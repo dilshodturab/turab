@@ -52,9 +52,11 @@ Two ways, both work:
 ## Wallpapers
 
 Drop any images into `public/images/wallpapers/` — nothing to configure. The
-build picks them all up and one is chosen at random on every page load (a
-different one each time you navigate). The first file alphabetically is the
-no-JS fallback. Keep them reasonably sized; they ship as-is.
+build picks them all up, and one is chosen at random the first time you open
+the site in a tab. It then stays put as you click around between pages; only
+an actual reload (or a new tab) picks a fresh one. The first file
+alphabetically is the no-JS fallback. Keep them reasonably sized; they ship
+as-is.
 
 ## Local development
 

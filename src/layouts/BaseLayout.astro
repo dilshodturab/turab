@@ -62,11 +62,23 @@ try {
     {
       wallpapers.length > 1 && (
         <script define:vars={{ wallpapers }}>
-          // Runs in <head>, before first paint: swap the server-rendered
-          // default wallpaper for a random one. No flash, no client JS files.
+          // <head>, before first paint: pick once per tab, keep it across route
+          // changes, re-pick only on a real reload (sessionStorage is per-tab).
+          const reload =
+            performance.getEntriesByType('navigation')[0]?.type === 'reload';
+          let pick = '';
+          try {
+            if (!reload) pick = sessionStorage.getItem('wallpaper') || '';
+            if (!wallpapers.includes(pick))
+              pick = wallpapers[(Math.random() * wallpapers.length) | 0];
+            sessionStorage.setItem('wallpaper', pick);
+          } catch {
+            // sessionStorage blocked — still show *a* wallpaper
+            pick = pick || wallpapers[(Math.random() * wallpapers.length) | 0];
+          }
           document.documentElement.style.setProperty(
             '--wallpaper',
-            `url("${wallpapers[(Math.random() * wallpapers.length) | 0]}")`
+            `url("${pick}")`
           );
         </script>
       )
