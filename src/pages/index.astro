@@ -16,33 +16,36 @@ const links = [
 <BaseLayout title="home">
   <Header crumbs={[{ label: '', href: '/' }]} />
 
-  <div class="home">
-    <pre class="ascii" id="ascii-art" set:html={ASCII_ART[0].art}></pre>
+  <!-- .term-body is the scrollable interior of the fixed glass card -->
+  <div class="term-body">
+    <div class="home">
+      <pre class="ascii" id="ascii-art" set:html={ASCII_ART[0].art}></pre>
 
-    <div class="serial">
-      <p class="serial-user">
-        {SITE.user}<span class="at-sign">@</span>{SITE.host}
-        <span class="at-sign">--</span>
-        {SITE.tagline}
-      </p>
-      <p class="serial-tagline">{SITE.bio}</p>
+      <div class="serial">
+        <p class="serial-user">
+          {SITE.user}<span class="at-sign">@</span>{SITE.host}
+          <span class="at-sign">--</span>
+          {SITE.tagline}
+        </p>
+        <p class="serial-tagline">{SITE.bio}</p>
 
-      <hr class="serial-sep" />
+        <hr class="serial-sep" />
 
-      <ul class="serial-links">
-        {
-          links.map((l) => (
-            <li class="row">
-              <span class="row-dash">───</span>
-              <a class="row-text" href={`/${l.path}`}>{l.label}</a>
-            </li>
-          ))
-        }
-      </ul>
+        <ul class="serial-links">
+          {
+            links.map((l) => (
+              <li class="row">
+                <span class="row-dash">───</span>
+                <a class="row-text" href={`/${l.path}`}>{l.label}</a>
+              </li>
+            ))
+          }
+        </ul>
 
-      <p class="serial-meta">
-        {SITE.email} · plain html · css+js ~4kb
-      </p>
+        <p class="serial-meta">
+          {SITE.email} · plain html · css+js ~4kb
+        </p>
+      </div>
     </div>
   </div>
 

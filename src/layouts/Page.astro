@@ -20,7 +20,10 @@ const year = new Date().getFullYear();
 
 <BaseLayout title={title} description={description}>
   <Header {crumbs} />
-  <slot />
+  <!-- .term-body is the scrollable interior of the fixed glass card -->
+  <div class="term-body">
+    <slot />
+  </div>
 
   <footer class="site-foot">
     <span>© {year} {SITE.user} · rendered to plain html at build</span>
