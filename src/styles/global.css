@@ -71,7 +71,8 @@ body {
   height: 100%;
   overflow: hidden;
   min-height: 100svh;
-  background: #000; /* solid behind the glass; backdrop-blur samples this */
+  /* Wallpaper behind the glass card; #000 stays as the fallback color. */
+  background: #000 url('/images/2402710.jpg') center / cover no-repeat;
   color: var(--ink);
   font-family: 'JetBrains Mono', 'JetBrains Mono Fallback', ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
   /* 14px fixed (terminals don't scale), line-height 24px = 3 × 8px grid */
