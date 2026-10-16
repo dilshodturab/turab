@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import { SITE } from '../config';
+import { ASCII_ART } from '../scripts/art.mjs';
+
+// Links shown in the fastfetch-style info panel, in order.
+const links = [
+  { path: 'about', label: '~/about' },
+  { path: 'posts', label: '~/posts' },
+  { path: 'projects', label: '~/projects' },
+  { path: 'random', label: '~/random' },
+];
+---
+
+<BaseLayout title="home">
+  <Header crumbs={[{ label: '', href: '/' }]} />
+
+  <div class="home">
+    <pre class="ascii" id="ascii-art" set:html={ASCII_ART[0].art}></pre>
+
+    <div class="serial">
+      <p class="serial-user">
+        {SITE.user}<span class="at-sign">@</span>{SITE.host}
+        <span class="at-sign">--</span>
+        {SITE.tagline}
+      </p>
+      <p class="serial-tagline">{SITE.bio}</p>
+
+      <hr class="serial-sep" />
+
+      <ul class="serial-links">
+        {
+          links.map((l) => (
+            <li class="row">
+              <span class="row-dash">───</span>
+              <a class="row-text" href={`/${l.path}`}>{l.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <p class="serial-meta">
+        {SITE.email} · plain html · css+js ~4kb
+      </p>
+    </div>
+  </div>
+
+  <script is:inline define:vars={{ art: ASCII_ART.map((a) => a.art) }}>
+    // The only JS on the site besides the clock: swap in a random ASCII art
+    // on each load. Runs once, no dependencies, no hydration.
+    const el = document.getElementById('ascii-art');
+    if (el && art.length > 1) {
+      el.textContent = art[Math.floor(Math.random() * art.length)];
+    }
+  </script>
+</BaseLayout>

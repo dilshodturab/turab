@@ -1,0 +1,46 @@
+---
+// /posts/ — auto-generated listing. Reads every *.md in /posts/ at build
+// time via the content collection. No manual links, ever.
+import { getCollection } from 'astro:content';
+import Page from '../../layouts/Page.astro';
+
+const posts = (await getCollection('posts'))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+---
+
+<Page title="posts" crumbs={[{ label: 'posts' }]}>
+  <div class="view">
+    <h1>~/posts</h1>
+    <p class="view-sub">
+      {posts.length} post{posts.length === 1 ? '' : 's'} — every .md file in /posts/, listed
+      automatically at build time.
+    </p>
+
+    <ul class="post-list">
+      {
+        posts.map((post) => (
+          <li>
+            <div class="row">
+              <span class="row-dash">───</span>
+              <a class="row-text" href={`/posts/${post.id}/`}>
+                {post.data.title ?? post.id}
+              </a>
+              <time class="row-meta" datetime={post.data.date.toISOString().slice(0, 10)}>
+                {fmt(post.data.date)}
+              </time>
+            </div>
+            {post.data.description && (
+              <p class="row-desc">{post.data.description}</p>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+
+    <a class="back" href="/">← cd ~</a>
+  </div>
+</Page>

@@ -1,0 +1,41 @@
+---
+// /posts/[slug] — renders one markdown file. Everything (including Shiki
+// syntax highlighting) happens at build time; the page ships as plain HTML.
+import { getCollection, render } from 'astro:content';
+import Page from '../../layouts/Page.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const title = post.data.title ?? post.id;
+const crumbs = [{ label: 'posts', href: '/posts' }, { label: post.id }];
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+---
+
+<Page title={title} description={post.data.description} crumbs={crumbs}>
+  <div class="view">
+    <h1>{title}</h1>
+
+    <div class="prose-meta">
+      <span>published {fmt(post.data.date)}</span>
+      <span>/posts/{post.id}.md</span>
+    </div>
+
+    <hr />
+
+    <article class="prose">
+      <Content />
+    </article>
+
+    <a class="back" href="/posts/">← ls ~/posts</a>
+  </div>
+</Page>

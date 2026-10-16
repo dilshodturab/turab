@@ -1,0 +1,600 @@
+/* ============================================================================
+   GLOBAL STYLESHEET — design system
+   ----------------------------------------------------------------------------
+   Layout ..... floating glass terminal, 14px outer margin, no top bar.
+   Type ....... JetBrains Mono everywhere, 14px base, dark only.
+   Grid ....... spacing tokens are strict multiples of 8px (OCD-proof);
+                vertical rhythm = line-height 1.7 on a 14px base.
+   Colors ..... dark only. Every color is an rgb(· / α) triplet so the only
+                thing CSS tweaks per-context is alpha. Tokens at the top.
+   ========================================================================== */
+
+/* [0] Fonts — JetBrains Mono from Google Fonts (loaded in BaseLayout),
+   with a metric-compatible local fallback so text never reflows.
+   Keep it simple sized because this is a static build. */
+@font-face {
+  font-family: 'JetBrains Mono Fallback';
+  src: local('Courier New');
+  line-gap-override: 0%;
+  ascent-override: 102.46%;
+  descent-override: 29.34%;
+  size-adjust: 100%;
+  font-display: swap;
+}
+
+/* [1] Theme tokens — rgb triplets; slide alpha on demand */
+:root {
+  --rgb-ink: 232 232 232;     /* #E8E8E8 text */
+  --rgb-bg: 10 10 10;         /* #0A0A0A terminal pane */
+  --rgb-ptr: 137 220 235;     /* #89DCEB link hover, used sparingly */
+
+  --ink: rgb(var(--rgb-ink) / 0.92);
+  --ink-soft: rgb(var(--rgb-ink) / 0.72);
+  --ink-dim: rgb(var(--rgb-ink) / 0.55);
+  --ink-faint: rgb(var(--rgb-ink) / 0.38);
+
+  /* 8px spacing scale — the ONLY horizontal/vertical rhythm used */
+  --sp-1: 8px;
+  --sp-2: 16px;
+  --sp-3: 24px;
+  --sp-4: 32px;
+  --sp-5: 40px;
+  --sp-6: 48px;
+
+  /* 14px page margin around the floating terminal (per the reference) */
+  --gutter: 14px;
+
+  --radius: 12px;
+  --line: rgb(255 255 255 / 0.1);   /* glass border color */
+  --dash: rgb(var(--rgb-ink) / 0.25); /* dashed separators */
+  --pane: rgb(var(--rgb-bg) / 0.55);  /* translucent pane fill */
+
+  color-scheme: dark;
+}
+
+/* [2] Reset + document baseline */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: #000; /* solid behind the glass; backdrop-blur samples this */
+  color: var(--ink);
+  font-family: 'JetBrains Mono', 'JetBrains Mono Fallback', ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+  /* 14px fixed (terminals don't scale), line-height 24px = 3 × 8px grid */
+  font-size: 14px;
+  line-height: 24px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgb(var(--rgb-ink) / 0.22);
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+a:hover {
+  color: rgb(var(--rgb-ptr) / 0.95);
+}
+
+a:focus-visible {
+  outline: 1px dashed rgb(var(--rgb-ink) / 0.6);
+  outline-offset: 2px;
+}
+
+/* [3] The terminal — floating glass card, 14px outer margin, no top bar */
+.term {
+  container-type: inline-size;
+  position: relative;
+  margin: var(--gutter);
+  width: calc(100% - var(--gutter) * 2);
+  min-height: calc(100svh - var(--gutter) * 2);
+  background: var(--pane);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow:
+    0 24px 60px rgb(0 0 0 / 0.45),
+    0 2px 8px rgb(0 0 0 / 0.35);
+  overflow: hidden;
+}
+
+/* [4] Header strip — breadcrumb path left, clock right */
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3) 0;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+.header a {
+  color: var(--ink-soft);
+}
+
+.header .crumbs::before {
+  content: '❯ ';
+  color: rgb(var(--rgb-ink) / 0.35);
+}
+
+.header .path-sep {
+  color: var(--ink-faint);
+  padding: 0 2px;
+}
+
+.header-time {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 500px) {
+  .header-time {
+    display: none;
+  }
+}
+
+/* [5] Home — fastfetch-style two-column terminal
+   Left: ASCII art (random per load); Right: user@host + bio + links */
+.home {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  align-items: start;
+}
+
+@media (min-width: 720px) {
+  .home {
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+    gap: var(--sp-5);
+  }
+}
+
+.ascii {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px; /* 2 × 8px grid */
+  color: var(--ink-dim);
+  white-space: pre;
+  overflow-x: auto;
+  user-select: none;
+}
+
+@media (max-width: 719px) {
+  .ascii {
+    font-size: 10px;
+    line-height: 12px;
+  }
+}
+
+.serial {
+  min-width: 0;
+}
+
+.serial-user {
+  margin: 0 0 var(--sp-1);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+.serial-user .at-sign {
+  color: var(--ink-dim);
+  font-weight: 400;
+}
+
+.serial-tagline {
+  margin: 0;
+  color: var(--ink-soft);
+  max-width: 62ch;
+}
+
+.serial-sep {
+  border: 0;
+  border-top: 1px dashed var(--dash);
+  margin: var(--sp-2) 0;
+}
+
+.serial-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-1);
+}
+
+.serial-links .row-dash {
+  color: var(--ink-faint);
+}
+
+.serial-links a:hover .row-dash,
+.serial-links a:hover .row-text {
+  color: rgb(var(--rgb-ptr) / 0.95);
+}
+
+.serial-links .row-text {
+  color: var(--ink);
+}
+
+.serial-meta {
+  margin: var(--sp-3) 0 0;
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+/* [6] Info rows — dash + label + (right-aligned meta) */
+.row {
+  display: flex;
+  gap: var(--sp-1);
+  align-items: baseline;
+  padding: 4px 0;
+}
+
+.row-dash {
+  color: var(--ink-faint);
+  flex: none;
+}
+
+.row-text {
+  color: var(--ink);
+}
+
+.row-meta {
+  color: var(--ink-faint);
+  font-size: 12px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* One-line description under each post row (frontmatter `description`). */
+.row-desc {
+  margin: -4px 0 8px 24px;
+  color: var(--ink-dim);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+@media (max-width: 560px) {
+  .row-meta {
+    display: none; /* keep the list scannable on narrow screens */
+  }
+}
+
+.post-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+}
+
+/* [7] Content pages (posts index, single post, projects, about, 404) */
+.view {
+  padding: var(--sp-3);
+  max-width: 78ch;
+}
+
+.view > * + * {
+  margin-top: var(--sp-3);
+}
+
+.view h1 {
+  margin: 0;
+  font-size: 2em;
+  line-height: 32px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.view .view-sub {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.view .back {
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+
+.view .back:hover {
+  color: rgb(var(--rgb-ptr) / 0.95);
+}
+
+.view hr,
+.prose hr {
+  border: 0;
+  border-top: 1px dashed var(--dash);
+  margin: var(--sp-3) 0;
+}
+
+.prose-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-3);
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+/* [8] Prose — article body */
+.prose {
+  padding: var(--sp-3);
+  max-width: 78ch;
+}
+
+.prose > * + * {
+  margin-top: var(--sp-3);
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  margin: var(--sp-5) 0 0;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.prose > h1:first-child,
+.prose > h2:first-child,
+.prose > h3:first-child {
+  margin-top: 0;
+}
+
+.prose h1 {
+  font-size: 2em;
+  line-height: 32px; /* 4 × 8px grid */
+}
+
+.prose h2 {
+  font-size: 1.5em;
+  line-height: 24px;
+}
+
+.prose h3 {
+  font-size: 1.25em;
+  line-height: 24px;
+}
+
+.prose h4,
+.prose h5,
+.prose h6 {
+  font-size: 1em;
+}
+
+.prose p {
+  margin-top: 0;
+  overflow-wrap: break-word;
+}
+
+.prose a {
+  text-decoration: underline;
+  text-decoration-color: rgb(var(--rgb-ink) / 0.35);
+  text-underline-offset: 3px;
+}
+
+.prose a:hover {
+  color: rgb(var(--rgb-ptr) / 0.95);
+  text-decoration-color: rgb(var(--rgb-ptr) / 0.6);
+}
+
+.prose strong {
+  color: rgb(var(--rgb-ink) / 1);
+  font-weight: 700;
+}
+
+.prose del {
+  color: var(--ink-faint);
+}
+
+.prose ul,
+.prose ol {
+  margin: var(--sp-3) 0 0;
+  padding-left: var(--sp-4);
+  display: grid;
+  gap: var(--sp-1);
+}
+
+.prose li::marker {
+  color: var(--ink-dim);
+}
+
+.prose ul ul,
+.prose ol ol,
+.prose ul ol,
+.prose ol ul {
+  margin-top: var(--sp-1);
+}
+
+.prose blockquote {
+  margin: var(--sp-3) 0 0;
+  padding: 0 0 0 var(--sp-3);
+  border-left: 2px solid rgb(var(--rgb-ink) / 0.25);
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.prose blockquote > * + * {
+  margin-top: var(--sp-2);
+}
+
+.prose code:not(pre code) {
+  font-size: 0.92em;
+  padding: 1.5px 5px;
+  border-radius: 5px;
+  background: rgb(var(--rgb-ink) / 0.09);
+  color: rgb(var(--rgb-ink) / 0.92);
+}
+
+/* GFM task lists */
+.prose ul:has(input[type='checkbox']) {
+  padding-left: var(--sp-2);
+  list-style: none;
+}
+
+.prose li:has(input[type='checkbox'])::marker {
+  content: '';
+}
+
+.prose input[type='checkbox'] {
+  margin-right: 6px;
+  accent-color: rgb(var(--rgb-ink) / 0.7);
+}
+
+/* [8.b] Prose tables */
+.prose table {
+  margin: var(--sp-3) 0 0;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92em;
+}
+
+.prose th,
+.prose td {
+  padding: var(--sp-1) var(--sp-2);
+  border-bottom: 1px solid rgb(var(--rgb-ink) / 0.12);
+  text-align: left;
+}
+
+.prose th {
+  color: var(--ink-dim);
+  font-weight: 600;
+  border-bottom-color: rgb(var(--rgb-ink) / 0.3);
+}
+
+/* [9] Code blocks — Shiki colors are baked in at build time; this only
+   wraps the block in the same glass language as everything else */
+.astro-code,
+.prose pre {
+  margin: var(--sp-3) 0 0;
+  padding: var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgb(var(--rgb-bg) / 0.45);
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 24px; /* 3 × 8px grid */
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--rgb-ink) / 0.25) transparent;
+}
+
+.astro-code code,
+.prose pre code {
+  font: inherit;
+}
+
+.astro-code::-webkit-scrollbar {
+  height: 8px;
+}
+
+.astro-code::-webkit-scrollbar-thumb {
+  background: rgb(var(--rgb-ink) / 0.2);
+  border-radius: 4px;
+}
+
+/* [10] Prose images — rounded, glassy, served from /public/images */
+.prose img {
+  margin: var(--sp-3) 0 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgb(var(--rgb-bg) / 0.45);
+  width: 100%;
+}
+
+.prose img[src*='emoji'] {
+  display: inline-block;
+  width: 1.1em;
+  height: 1.1em;
+  margin: 0 0.1em;
+  vertical-align: -0.15em;
+  border: none;
+  background: none;
+}
+
+/* [11] Footer */
+.site-foot {
+  padding: var(--sp-1) var(--sp-3) var(--sp-3);
+  color: var(--ink-faint);
+  font-size: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-3);
+  justify-content: space-between;
+}
+
+.site-foot a {
+  color: var(--ink-dim);
+}
+
+.site-foot a:hover {
+  color: rgb(var(--rgb-ptr) / 0.95);
+}
+
+/* [12] Reduced motion — nothing animates here anyway */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* [13] Print — strip glass, keep ink on white */
+@media print {
+  .term {
+    margin: 0;
+    width: 100%;
+    min-height: 0;
+    border: 0;
+    background: #fff;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .prose *,
+  .view * {
+    color: #000 !important;
+  }
+
+  .astro-code,
+  .prose pre {
+    border-color: #ccc;
+    background: #f6f6f6 !important;
+  }
+
+  .header-time,
+  .ascii {
+    display: none;
+  }
+}

@@ -1,0 +1,29 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Header from '../components/Header.astro';
+import { SITE } from '../config';
+
+interface Crumb {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  crumbs?: Crumb[];
+}
+
+const { title, description, crumbs = [] } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<BaseLayout title={title} description={description}>
+  <Header {crumbs} />
+  <slot />
+
+  <footer class="site-foot">
+    <span>© {year} {SITE.user} · rendered to plain html at build</span>
+    <span><a href="/">~</a> · <em>this site collects nothing</em></span>
+  </footer>
+</BaseLayout>

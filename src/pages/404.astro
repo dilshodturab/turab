@@ -1,0 +1,21 @@
+---
+import Page from '../layouts/Page.astro';
+---
+
+<Page title="404" crumbs={[{ label: '404' }]}>
+  <div class="view">
+    <h1>~/404</h1>
+    <p class="view-sub">
+      bash: cd: {Astro.url.pathname}: No such file or directory
+    </p>
+
+    <hr />
+
+    <article class="prose">
+      <p>The path you typed does not exist here. It might have been a post that was renamed or removed.</p>
+      <p><a href="/">return home</a> or <a href="/posts/">browse posts</a>.</p>
+    </article>
+
+    <a class="back" href="/">← cd ~</a>
+  </div>
+</Page>

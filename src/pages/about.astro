@@ -1,0 +1,39 @@
+---
+import Page from '../layouts/Page.astro';
+import { SITE } from '../config';
+---
+
+<Page title="about" crumbs={[{ label: 'about' }]}>
+  <div class="view">
+    <h1>~/about</h1>
+    <p class="view-sub">{SITE.tagline}</p>
+
+    <hr />
+
+    <article class="prose">
+      <p>
+        I build small tools and this website. Everything here is a plain markdown file in
+        <code>/posts/</code> — pushed to git, rendered to static html at build time. No CMS, no
+        database, no cookies, no analytics.
+      </p>
+
+      <h2>This site</h2>
+      <ul>
+        <li>Single font: JetBrains Mono, 8px baseline grid, dark only.</li>
+        <li>Posts: drop a <code>.md</code> file in <code>/posts/</code>, push — done.</li>
+        <li>Syntax highlighting: Shiki at build time (catppuccin-mocha), no JS shipped.</li>
+        <li>JS budget: one inline script for the clock and the random ASCII art.</li>
+      </ul>
+
+      <h2>Now</h2>
+      <blockquote>
+        <p>
+          Building a browser in a terminal, in a browser. It terminates at some point; not
+          soon.
+        </p>
+      </blockquote>
+    </article>
+
+    <a class="back" href="/">← cd ~</a>
+  </div>
+</Page>

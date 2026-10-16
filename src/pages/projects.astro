@@ -1,0 +1,53 @@
+---
+import Page from '../layouts/Page.astro';
+
+// Hand-written list — edit this file when a project is added/retired.
+const projects = [
+  {
+    name: 'glass-glass-glass',
+    desc: 'Terminal-style portfolio with auto posts (this site).',
+    href: '/',
+    lang: 'astro',
+  },
+  {
+    name: 'dotfiles',
+    desc: 'Neovim, tmux, and terminal config — reproducible in one script.',
+    href: '#',
+    lang: 'lua',
+  },
+  {
+    name: 'f',
+    desc: 'find but it just works. 40 lines of fzf glue for everyday files.',
+    href: '#',
+    lang: 'rust',
+  },
+];
+---
+
+<Page title="projects" crumbs={[{ label: 'projects' }]}>
+  <div class="view">
+    <h1>~/projects</h1>
+    <p class="view-sub">three things that survived. the graveyard is private.</p>
+
+    <hr />
+
+    <ul class="post-list">
+      {
+        projects.map((p) => (
+          <li>
+            <div class="row">
+              <span class="row-dash">───</span>
+              <a class="row-text" href={p.href}>
+                {p.name}
+              </a>
+              <span class="row-meta">{p.lang}</span>
+            </div>
+            <p class="serial-tagline" style="margin: 0 0 8px">{p.desc}</p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <a class="back" href="/">← cd ~</a>
+  </div>
+</Page>

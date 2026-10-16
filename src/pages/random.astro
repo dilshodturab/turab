@@ -1,0 +1,40 @@
+---
+// /random — picks a random post and navigates there. The post list is baked
+// in at build time; the picker is ~150 bytes of inline JS (in the 2kb budget).
+import { getCollection } from 'astro:content';
+import Page from '../layouts/Page.astro';
+
+const posts = (await getCollection('posts'))
+  .filter((p) => !p.data.draft)
+  .map((p) => `/posts/${p.id}/`);
+---
+
+<Page title="random" crumbs={[{ label: 'random' }]}>
+  <div class="view">
+    <h1>~/random</h1>
+    <p class="view-sub" id="random-target">rolling…</p>
+
+    <hr />
+
+    <article class="prose">
+      <p>
+        this page forwards to a random post. if nothing happens, your browser blocked the
+        jump — <a id="random-link" href={posts[0] ?? '/posts/'}>here is one</a>.
+      </p>
+    </article>
+
+    <a class="back" href="/">← cd ~</a>
+  </div>
+
+  <script is:inline define:vars={{ posts }}>
+    (function () {
+      if (!posts.length) return;
+      var target = posts[Math.floor(Math.random() * posts.length)];
+      var note = document.getElementById('random-target');
+      var link = document.getElementById('random-link');
+      if (note) note.textContent = '→ ' + target;
+      if (link) link.setAttribute('href', target);
+      location.replace(target);
+    })();
+  </script>
+</Page>

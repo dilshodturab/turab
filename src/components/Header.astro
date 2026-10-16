@@ -1,0 +1,45 @@
+---
+// Terminal breadcrumb strip: ❯ ~/posts/slug (left) + live clock (right).
+// The clock is the only shared JS on the site — one inline, ~30 lines total
+// across the whole site, no hydration anywhere.
+interface Crumb {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  crumbs?: Crumb[];
+}
+
+const { crumbs = [] } = Astro.props;
+---
+
+<div class="header">
+  <span class="crumbs">
+    <a href="/">~/</a>{
+      crumbs.map((c, i) => (
+        <>
+          <a href={c.href ?? `/${c.label}`}>{c.label}</a>
+          {i < crumbs.length - 1 && <span class="path-sep">/</span>}
+        </>
+      ))
+    }
+  </span>
+  <span class="header-time" id="hdr-clock" aria-hidden="true">--:--:--</span>
+</div>
+
+<script is:inline>
+  (function () {
+    var el = document.getElementById('hdr-clock');
+    if (!el) return;
+    function tick() {
+      var d = new Date();
+      var p = function (n) {
+        return String(n).padStart(2, '0');
+      };
+      el.textContent = p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+    }
+    tick();
+    setInterval(tick, 1000);
+  })();
+</script>
