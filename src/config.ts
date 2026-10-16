@@ -2,16 +2,16 @@
 // every page imports from it, so a change here propagates everywhere.
 export const SITE = {
   /** Shown in the terminal title bar and as user@host in the info panel. */
-  user: 'avmado',
+  user: 'turab',
   host: 'portfolio',
   /** Display name used in <title> and RSS. */
-  title: 'avmado — personal site',
+  title: 'turab - personal site',
   /** One-liner printed after user@host in the fastfetch-style panel. */
-  tagline: 'builder of small tools and this website.',
+  tagline: 'Vim elitist, backend engineer, owner of this website.',
   /** Short paragraph under the dashed separator. */
-  bio: 'I write about Neovim, shell tooling and the web. Everything here is a plain markdown file in /posts — pushed to git, rendered at build time.',
+  bio: 'I write about linux, vim, backend engineering and the web.',
   /** Contact line in the info panel footer. */
-  email: 'hi@avmado.dev',
+  email: 'dilshodturab@gmail.com',
   /** Canonical URL — set this to your real domain before going live (used for RSS/atom feeds). */
   url: 'https://example.com',
 } as const;
