@@ -1,5 +1,6 @@
 ---
 // Sole layout: <head>, fonts, global CSS. Every page wraps itself in this.
+import { readdirSync } from 'node:fs';
 import '../styles/global.css';
 import { SITE } from '../config';
 
@@ -12,10 +13,31 @@ interface Props {
 
 const { title, description = SITE.tagline } = Astro.props;
 const fullTitle = `${SITE.user}@${SITE.host}:~$ ${title}`;
+
+// Wallpapers: every image dropped into public/images/wallpapers/ is a
+// candidate — no list to maintain. The first (sorted) one is rendered as
+// the default via a CSS variable; the inline script below swaps in a
+// random pick before first paint, so there is no flash of the default.
+// With JS off, the first wallpaper still shows.
+const WALLPAPER_DIR = 'public/images/wallpapers';
+const WALLPAPER_EXT = /\.(jpe?g|png|webp|avif|gif)$/i;
+
+let wallpapers: string[] = [];
+try {
+  wallpapers = readdirSync(WALLPAPER_DIR, { withFileTypes: true })
+    .filter((e) => e.isFile() && WALLPAPER_EXT.test(e.name))
+    .map((e) => `/images/wallpapers/${e.name}`)
+    .sort();
+} catch {
+  /* no wallpapers directory — body keeps its #000 fallback */
+}
 ---
 
 <!doctype html>
-<html lang="en">
+<html
+  lang="en"
+  style={wallpapers[0] ? `--wallpaper: url("${wallpapers[0]}")` : undefined}
+>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -37,6 +59,18 @@ const fullTitle = `${SITE.user}@${SITE.host}:~$ ${title}`;
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400..800;1,400..800&display=swap"
     />
+    {
+      wallpapers.length > 1 && (
+        <script define:vars={{ wallpapers }}>
+          // Runs in <head>, before first paint: swap the server-rendered
+          // default wallpaper for a random one. No flash, no client JS files.
+          document.documentElement.style.setProperty(
+            '--wallpaper',
+            `url("${wallpapers[(Math.random() * wallpapers.length) | 0]}")`
+          );
+        </script>
+      )
+    }
   </head>
   <body>
     <!-- 14px margin lives on .term; body has no top bar or chrome by design. -->

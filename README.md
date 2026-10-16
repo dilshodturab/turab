@@ -49,6 +49,13 @@ Two ways, both work:
    relative path: `![alt](./screenshot.png)`. Astro optimizes it (resizing +
    WebP) at build time.
 
+## Wallpapers
+
+Drop any images into `public/images/wallpapers/` — nothing to configure. The
+build picks them all up and one is chosen at random on every page load (a
+different one each time you navigate). The first file alphabetically is the
+no-JS fallback. Keep them reasonably sized; they ship as-is.
+
 ## Local development
 
 ```sh
@@ -73,6 +80,7 @@ that file is the single place for all personal info.
 ```
 posts/                      ← your markdown lives here (auto-listed)
 public/images/              ← shared static images
+public/images/wallpapers/   ← random page background (any image, auto-picked)
 src/
   config.ts                 ← name, host, tagline, bio, email, url
   content.config.ts         ← the posts collection (frontmatter schema)
