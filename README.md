@@ -51,12 +51,17 @@ Two ways, both work:
 
 ## Wallpapers
 
-Drop any images into `public/images/wallpapers/` — nothing to configure. The
-build picks them all up, and one is chosen at random the first time you open
-the site in a tab. It then stays put as you click around between pages; only
-an actual reload (or a new tab) picks a fresh one. The first file
-alphabetically is the no-JS fallback. Keep them reasonably sized; they ship
-as-is.
+Drop any images into `src/assets/wallpapers/` — nothing to configure. At build
+time each one is downscaled to a 1920px WebP (the 4K originals are never
+shipped, which is what made the site slow). One is chosen at random the first
+time you open the site in a tab and stays put as you click around between
+pages; only an actual reload (or a new tab) picks a fresh one. The wallpaper
+downloads hidden and fades in once it has fully loaded, instead of painting in
+top-to-bottom. The first file alphabetically is the no-JS fallback.
+
+Tuning lives at the top of `src/layouts/BaseLayout.astro`: `WALLPAPER_WIDTH`
+(1920 is plenty behind the blur — raise it for crisper 4K) and
+`WALLPAPER_QUALITY`.
 
 ## Local development
 
@@ -82,8 +87,8 @@ that file is the single place for all personal info.
 ```
 posts/                      ← your markdown lives here (auto-listed)
 public/images/              ← shared static images
-public/images/wallpapers/   ← random page background (any image, auto-picked)
 src/
+  assets/wallpapers/        ← random page background (auto-optimized at build)
   config.ts                 ← name, host, tagline, bio, email, url
   content.config.ts         ← the posts collection (frontmatter schema)
   styles/global.css         ← the whole design system
