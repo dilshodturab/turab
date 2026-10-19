@@ -2,6 +2,8 @@
 // Sole layout: <head>, fonts, global CSS. Every page wraps itself in this.
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import sharp from 'sharp';
+import path from 'node:path';
 import '../styles/global.css';
 import { SITE } from '../config';
 
@@ -20,8 +22,14 @@ const fullTitle = `${SITE.user}@${SITE.host}:~$ ${title}`;
 // multi-megabyte 4K originals are never shipped; that is most of this site's
 // page weight. The first (sorted) one is rendered as the default via a CSS
 // variable so the page still has a background with JS off; the inline script
-// below swaps in a random pick before first paint and fades the layer in once
-// the image has fully loaded.
+// below swaps in a random pick before first paint and lifts the veil once the
+// image has fully loaded.
+//
+// The wallpaper is applied as the page's *canvas* background (via body, with
+// html left transparent so it propagates). That matters: the glass card's
+// backdrop-filter samples what is behind it, and a separately composited layer
+// can be captured before it has rasterised — which flashed on every navigation
+// when the wallpaper lived in its own fixed layer.
 const WALLPAPER_WIDTH = 1920; // plenty behind a 16px backdrop blur
 const WALLPAPER_QUALITY = 70;
 
@@ -30,26 +38,35 @@ const wallpaperFiles = import.meta.glob(
   { eager: true, import: 'default' }
 ) as Record<string, ImageMetadata>;
 
-const wallpapers = await Promise.all(
-  Object.keys(wallpaperFiles)
-    .sort()
-    .map(async (path) => {
-      const { src } = await getImage({
-        src: wallpaperFiles[path],
-        width: WALLPAPER_WIDTH,
-        format: 'webp',
-        quality: WALLPAPER_QUALITY,
-      });
-      return src;
-    })
-);
+const wallpapers: string[] = [];
+// Average colour of each wallpaper, used as the page background while the
+// image loads: a flat wash of the right tone reads far calmer than black.
+const wallpaperBgs: string[] = [];
+
+for (const p of Object.keys(wallpaperFiles).sort()) {
+  const { src } = await getImage({
+    src: wallpaperFiles[p],
+    width: WALLPAPER_WIDTH,
+    format: 'webp',
+    quality: WALLPAPER_QUALITY,
+  });
+  wallpapers.push(src);
+
+  const [r, g, b] = await sharp(path.join(process.cwd(), p))
+    .resize(1, 1, { fit: 'fill' })
+    .raw()
+    .toBuffer();
+  wallpaperBgs.push(`rgb(${r} ${g} ${b})`);
+}
+
+// Server-rendered default (first file) — what shows with JS off.
+const defaultStyle = wallpapers[0]
+  ? `--wallpaper: url("${wallpapers[0]}"); --wp-bg: ${wallpaperBgs[0]}`
+  : undefined;
 ---
 
 <!doctype html>
-<html
-  lang="en"
-  style={wallpapers[0] ? `--wallpaper: url("${wallpapers[0]}")` : undefined}
->
+<html lang="en" style={defaultStyle}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -73,11 +90,12 @@ const wallpapers = await Promise.all(
     />
     {
       wallpapers.length > 0 && (
-        <script define:vars={{ wallpapers }}>
+        <script define:vars={{ wallpapers, wallpaperBgs }}>
           // <head>, before first paint. Pick once per tab and keep it across
           // route changes; re-pick only on a real reload (sessionStorage is
-          // per-tab). The layer stays hidden until the image is fully loaded
-          // and decoded, so it fades in instead of painting top-to-bottom.
+          // per-tab). The wallpaper sits on the canvas background; the veil
+          // covers it until the image is fully loaded and decoded, then lifts
+          // — so you never watch it paint top-to-bottom.
           const root = document.documentElement;
           root.classList.add('js');
           const reload =
@@ -98,14 +116,18 @@ const wallpapers = await Promise.all(
             pick = pick || wallpapers[(Math.random() * wallpapers.length) | 0];
           }
           root.style.setProperty('--wallpaper', `url("${pick}")`);
+          root.style.setProperty(
+            '--wp-bg',
+            wallpaperBgs[wallpapers.indexOf(pick)] || '#000'
+          );
           const done = () => {
             root.classList.add('wp-ready');
             try {
               sessionStorage.setItem('wallpaper-ready', '1');
             } catch {}
           };
-          // Already revealed in this tab (a route change): show it at once —
-          // no fade, and no black flicker between pages.
+          // Already revealed in this tab (a route change): lift the veil at
+          // once — no fade and no flicker between pages.
           if (seen) done();
           else {
             const img = new Image();
@@ -118,8 +140,10 @@ const wallpapers = await Promise.all(
     }
   </head>
   <body>
-    <!-- Decorative wallpaper layer; the head script reveals it once loaded. -->
-    <div class="wallpaper" aria-hidden="true"></div>
+    <!-- Reveal veil: a wash of the wallpaper's average colour, lifted by the
+         head script once the image has loaded. Nothing else paints here — the
+         wallpaper itself is the canvas background (see global.css [2]). -->
+    <div class="wp-veil" aria-hidden="true"></div>
     <!-- 14px margin lives on .term; body has no top bar or chrome by design. -->
     <main class="term">
       <slot />

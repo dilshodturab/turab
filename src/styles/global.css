@@ -71,9 +71,19 @@ body {
   height: 100%;
   overflow: hidden;
   min-height: 100svh;
-  /* Solid black sits behind the wallpaper layer; it is what shows while the
-     image downloads, so the page is never white. */
-  background: #000;
+  /* [2] The wallpaper IS the page background. html has no background, so this
+     propagates to the canvas and is painted with the document's very first
+     frame — which is what the glass card's backdrop-filter samples. Keeping it
+     here (rather than in its own composited layer) is deliberate: a separate
+     layer can be captured before it has rasterised, and that showed up as the
+     background flashing on every navigation.
+     --wp-bg is the image's average colour (computed at build time) so the page
+     is never a black hole while the image loads. */
+  background-color: var(--wp-bg, #000);
+  background-image: var(--wallpaper, none);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
   color: var(--ink);
   font-family: 'JetBrains Mono', 'JetBrains Mono Fallback', ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
   /* 14px fixed (terminals don't scale), line-height 24px = 3 × 8px grid */
@@ -83,29 +93,27 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* [2b] Wallpaper layer — fixed, behind the glass card. It stays invisible
-   until the image has fully loaded, then fades in with a slow settle, so you
-   never watch it paint top-to-bottom. `html.js` is added by the head script:
-   with JS off the layer is simply visible from the start (first file wins). */
-.wallpaper {
+/* [2b] Reveal veil — a flat wash of the wallpaper's average colour covering
+   the page until the image has fully loaded, then lifted. It only animates
+   opacity (a composited, paint-free property), so it never forces the card's
+   backdrop to be re-captured. `html.js` is added by the head script: with JS
+   off the veil stays transparent and the server-rendered wallpaper shows. */
+.wp-veil {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: var(--wallpaper, none) center / cover no-repeat;
+  background: var(--wp-bg, #000);
+  opacity: 0;
   pointer-events: none;
 }
 
-html.js .wallpaper {
-  opacity: 0;
-  transform: scale(1.04);
-  transition:
-    opacity 0.7s ease,
-    transform 1.4s ease;
+html.js .wp-veil {
+  opacity: 1;
+  transition: opacity 0.8s ease;
 }
 
-html.wp-ready .wallpaper {
-  opacity: 1;
-  transform: none;
+html.wp-ready .wp-veil {
+  opacity: 0;
 }
 
 ::selection {
@@ -673,7 +681,7 @@ a:focus-visible {
     color: #000;
   }
 
-  .wallpaper {
+  .wp-veil {
     display: none;
   }
 

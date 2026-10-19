@@ -53,10 +53,12 @@ Two ways, both work:
 
 Drop any images into `src/assets/wallpapers/` — nothing to configure. At build
 time each one is downscaled to a 1920px WebP (the 4K originals are never
-shipped, which is what made the site slow). One is chosen at random the first
-time you open the site in a tab and stays put as you click around between
-pages; only an actual reload (or a new tab) picks a fresh one. The wallpaper
-downloads hidden and fades in once it has fully loaded, instead of painting in
+shipped, which is what made the site slow) and its average colour is computed.
+One is chosen at random the first time you open the site in a tab and stays put
+as you click around between pages; only an actual reload (or a new tab) picks a
+fresh one. The wallpaper is the page's canvas background, so it is painted with
+the first frame; a veil of the image's average colour covers it until it has
+fully loaded and then lifts, so you get a fade rather than watching it paint
 top-to-bottom. The first file alphabetically is the no-JS fallback.
 
 Tuning lives at the top of `src/layouts/BaseLayout.astro`: `WALLPAPER_WIDTH`
